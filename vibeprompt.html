@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibes.diy Prompt Builder for Educators</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; color: #333; }
+    h1 { font-size: 1.8rem; }
+    label { font-weight: bold; display: block; margin-top: 1rem; }
+    textarea, input, select { width: 100%; padding: 0.6rem; margin-top: 0.4rem; border: 1px solid #aaa; border-radius: 5px; }
+    button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-weight: bold; cursor: pointer; border-radius: 5px; }
+    #output { white-space: pre-wrap; background: #fff; padding: 1rem; border: 1px solid #ccc; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>🎛️ Vibes.diy System Prompt Builder (for Science Educators)</h1>
+
+  <label>1️⃣ Type of Interaction (e.g., click-to-generate, slider, multiple-choice, drag-and-drop)</label>
+  <input id="interaction" placeholder="Example: Click-to-generate (randomizer)" />
+
+  <label>2️⃣ Goal of the App (What does it teach or assess?)</label>
+  <textarea id="goal" rows="3" placeholder="Example: Reinforce ionic nomenclature and recognition of ion charges"></textarea>
+
+  <label>3️⃣ Student Actions (What will students do inside the app?)</label>
+  <textarea id="actions" rows="3" placeholder="Example: Click to generate ions, observe symbol and charge, track how often each appears"></textarea>
+
+  <label>4️⃣ Output (What does the app show, calculate, or return?)</label>
+  <textarea id="outputText" rows="3" placeholder="Example: Display name, symbol with charge, and counters for review tracking"></textarea>
+
+  <label>5️⃣ Additional Features (Optional: Gamification, hints, timers, color cues, scaffolded feedback)</label>
+  <textarea id="features" rows="3" placeholder="Example: Includes a reset button, visual styling by charge, and student tip section"></textarea>
+
+  <label>📘 Learning Standard (Include NGSS, IB, AP, or custom standard if known)</label>
+  <input id="standard" placeholder="Example: SC.912.P.8.2 — Differentiate between ionic and covalent bonds" />
+
+  <button onclick="generatePrompt()">🧠 Generate System Prompt</button>
+  <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+  <button onclick="downloadPrompt()">💾 Download .txt</button>
+
+  <div id="output"></div>
+
+  <script>
+    function generatePrompt() {
+      const interaction = document.getElementById("interaction").value;
+      const goal = document.getElementById("goal").value;
+      const actions = document.getElementById("actions").value;
+      const outputText = document.getElementById("outputText").value;
+      const features = document.getElementById("features").value;
+      const standard = document.getElementById("standard").value;
+
+      const prompt = `You are a science education app generator. Build an interactive learning tool for high school students based on the following design criteria:
+
+• Type of interaction: ${interaction}
+• Goal of the app: ${goal}
+• Student actions: ${actions}
+• Output generated: ${outputText}
+${features ? `• Additional features: ${features}` : ""}
+${standard ? `• Target standard: ${standard}` : ""}
+
+The app should support inquiry-based learning and sensemaking aligned with NGSS, IB, AP, or state standards. It should be suitable for deployment using the Vibes.diy platform as a single-page interactive experience. Format the app layout clearly and prioritize student usability.`
+
+      document.getElementById("output").innerText = prompt;
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("output").innerText;
+      navigator.clipboard.writeText(text).then(() => alert("System prompt copied to clipboard!"));
+    }
+
+    function downloadPrompt() {
+      const text = document.getElementById("output").innerText;
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = "vibes_prompt.txt";
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
