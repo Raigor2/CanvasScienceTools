@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Vibes.diy Prompt Builder for Educators</title>
+  <!-- Intellectual Property Notice -->
+  <!-- Created independently by Derikson Rivera-Rios. Not developed under employment or using institutional resources. Licensed under CC BY-NC 4.0. -->
   <style>
     body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; color: #333; }
     h1 { font-size: 1.8rem; }
@@ -10,6 +12,8 @@
     textarea, input, select { width: 100%; padding: 0.6rem; margin-top: 0.4rem; border: 1px solid #aaa; border-radius: 5px; }
     button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-weight: bold; cursor: pointer; border-radius: 5px; }
     #output { white-space: pre-wrap; background: #fff; padding: 1rem; border: 1px solid #ccc; margin-top: 2rem; }
+    footer { margin-top: 3rem; font-size: 0.9rem; color: #555; }
+    footer a { color: #555; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -39,6 +43,16 @@
 
   <div id="output"></div>
 
+  <footer>
+    <hr />
+    <p><strong>Attribution:</strong> This tool was developed independently by Derikson Rivera-Rios in a personal capacity. It is not a product of, nor does it reflect the views of, any employer, institution, or organization with which the author may be affiliated. All content is the original intellectual property of the author.
+
+Unless otherwise noted, this work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+© 2025 Derikson Rivera-Rios. All rights reserved.
+</p>
+  </footer>
+
   <script>
     function generatePrompt() {
       const interaction = document.getElementById("interaction").value;
@@ -57,7 +71,7 @@
 ${features ? `• Additional features: ${features}` : ""}
 ${standard ? `• Target standard: ${standard}` : ""}
 
-The app should support inquiry-based learning and sensemaking aligned with NGSS, IB, AP, or state standards. It should be suitable for deployment using the Vibes.diy platform as a single-page interactive experience. Format the app layout clearly and prioritize student usability.`
+The app should support inquiry-based learning and sensemaking aligned with NGSS, IB, AP, or state standards. It should be suitable for deployment using the Vibes.diy platform as a single-page interactive experience. Format the app layout clearly and prioritize student usability.`;
 
       document.getElementById("output").innerText = prompt;
     }
