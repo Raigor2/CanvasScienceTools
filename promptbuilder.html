@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM Prompt Builder (Best Practices MVP)</title>
+
+  <!-- Intellectual Property Notice -->
+  <!-- Created independently by Derikson Rivera-Rios. Not developed under employment or using institutional resources. Licensed under CC BY-NC 4.0. -->
+
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 2rem; background: #f4f4f4; color: #222; }
+    h1 { font-size: 1.8rem; margin: 0 0 .25rem; }
+    .sub { margin: 0 0 1.25rem; color: #555; max-width: 980px; }
+    label { font-weight: 700; display: block; margin-top: 1rem; }
+    textarea, input, select {
+      width: 100%; padding: 0.65rem; margin-top: 0.4rem;
+      border: 1px solid #aaa; border-radius: 8px; background: #fff;
+    }
+    textarea { resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 900px){ .row { grid-template-columns: 1fr; } body { padding: 1rem; } }
+    .btns { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+    button {
+      padding: 0.65rem 1.1rem; font-weight: 700; cursor: pointer;
+      border-radius: 10px; border: 1px solid #111; background: #111; color: #fff;
+    }
+    button.secondary { background: #fff; color: #111; }
+    button.ghost { background: transparent; color: #111; border: 1px solid #aaa; }
+    #outputWrap { margin-top: 1.5rem; }
+    .tabs { display: flex; gap: .5rem; margin: 0 0 .5rem; flex-wrap: wrap; }
+    .tab {
+      border: 1px solid #aaa; background: #fff; padding: .35rem .6rem;
+      border-radius: 999px; cursor: pointer; font-weight: 700; color: #333;
+    }
+    .tab.active { background: #111; color: #fff; border-color: #111; }
+    #output {
+      white-space: pre-wrap; background: #fff; padding: 1rem;
+      border: 1px solid #ccc; border-radius: 12px; max-width: 980px;
+    }
+    .hint {
+      max-width: 980px; background: #fff; border: 1px solid #ddd; border-radius: 12px;
+      padding: .9rem 1rem; margin-top: 1rem; color: #444;
+    }
+    .hint b { color: #111; }
+    footer { margin-top: 3rem; font-size: 0.92rem; color: #555; max-width: 980px; }
+    footer a { color: #555; text-decoration: underline; }
+    .small { font-size: .95rem; color: #555; margin-top: .25rem; }
+  </style>
+</head>
+
+<body>
+  <h1>LLM Prompt Builder (Best Practices MVP)</h1>
+  <p class="sub">
+    Build a high-quality prompt by specifying role, task, audience, context, constraints, format, tone, examples, and quality checks.
+    This is tool-agnostic and works for ChatGPT, Copilot-style chats, Claude, Gemini, local LLMs, etc.
+  </p>
+
+  <div class="row">
+    <div>
+      <label>1️⃣ Role (Who should the AI act as?)</label>
+      <input id="role" placeholder="Example: You are an instructional coach and assessment designer." />
+
+      <label>2️⃣ Task (What do you want it to do?)</label>
+      <textarea id="task" rows="3" placeholder="Example: Draft a 15-minute mini-lesson plan introducing CER writing in science."></textarea>
+
+      <label>3️⃣ Audience (Who is this for?)</label>
+      <input id="audience" placeholder="Example: 10th grade students; mixed readiness; multilingual learners included." />
+
+      <label>4️⃣ Context / Inputs (What info should the AI use?)</label>
+      <textarea id="context" rows="4" placeholder="Example: Topic = chemical reactions; students have lab data table; time = 15 minutes; materials = projector + handout."></textarea>
+    </div>
+
+    <div>
+      <label>5️⃣ Output Format (How should the answer be structured?)</label>
+      <select id="format">
+        <option value="bulleted">Bulleted outline</option>
+        <option value="numbered">Numbered steps</option>
+        <option value="table">Table</option>
+        <option value="template">Fill-in template</option>
+        <option value="rubric">Rubric</option>
+        <option value="checklist">Checklist</option>
+        <option value="paragraphs">Short paragraphs with headings</option>
+      </select>
+
+      <label>6️⃣ Tone (Optional)</label>
+      <input id="tone" placeholder="Example: Professional, clear, encouraging, concise." />
+
+      <label>7️⃣ Constraints (Optional: limits, must/avoid, policies)</label>
+      <textarea id="constraints" rows="4" placeholder="Example: Use grade-appropriate language; include differentiation; avoid jargon; keep under 400 words; no external links."></textarea>
+
+      <label>8️⃣ Success Criteria / Quality Checks (Optional)</label>
+      <textarea id="quality" rows="4" placeholder="Example: Include learning target + success criteria; include checks for understanding; include accommodations for MLLs; align to standard if provided."></textarea>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>9️⃣ Example (Optional: show a “good” sample or style reference)</label>
+      <textarea id="example" rows="4" placeholder="Example: 'Use a Do Now, then model a strong CER, then guided practice with sentence starters…'"></textarea>
+      <div class="small">Tip: Even a short example dramatically improves outputs.</div>
+    </div>
+    <div>
+      <label>🔟 Standard / Requirement (Optional)</label>
+      <input id="standard" placeholder="Example: NGSS HS-PS1-2 or district framework requirement." />
+
+      <label>🧠 Clarifying Questions (Optional)</label>
+      <select id="clarifyMode">
+        <option value="ask_first">Ask up to 3 clarifying questions first if anything is missing.</option>
+        <option value="assume_then_answer">Make reasonable assumptions and proceed; list assumptions.</option>
+        <option value="no_questions">Do not ask questions; produce best possible output.</option>
+      </select>
+
+      <label>🧩 Include “System + User” split?</label>
+      <select id="splitMode">
+        <option value="single">Single copy-ready prompt (recommended for most users)</option>
+        <option value="split">System message + User message (for tools that support system prompts)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button onclick="generatePrompt()">Generate Prompt</button>
+    <button class="secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+    <button class="ghost" onclick="downloadPrompt()">Download .txt</button>
+    <button class="ghost" onclick="clearFields()">Clear Fields</button>
+  </div>
+
+  <div class="hint">
+    <b>Best-practice reminder:</b> Strong prompts define the role, the task, the audience, the inputs, the required format, and constraints.
+    If you want higher reliability, add success criteria and require the AI to list assumptions or ask clarifying questions.
+  </div>
+
+  <div id="outputWrap">
+    <div class="tabs" id="tabs" style="display:none;">
+      <div class="tab active" id="tabFinal" onclick="showTab('final')">Final Prompt</div>
+      <div class="tab" id="tabSystem" onclick="showTab('system')">System</div>
+      <div class="tab" id="tabUser" onclick="showTab('user')">User</div>
+    </div>
+
+    <div id="output"></div>
+  </div>
+
+  <footer>
+    <hr />
+    <p><strong>Attribution:</strong> This tool was developed independently by Derikson Rivera-Rios in a personal capacity. It is not a product of, nor does it reflect the views of, any employer, institution, or organization with which the author may be affiliated. All content is the original intellectual property of the author.</p>
+    <p>Unless otherwise noted, this work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</p>
+    <p>© 2025 Derikson Rivera-Rios. All rights reserved.</p>
+  </footer>
+
+  <script>
+    let lastGenerated = { final: "", system: "", user: "" };
+    let activeView = "final";
+
+    function clean(s){ return (s || "").trim(); }
+
+    function generatePrompt() {
+      const role = clean(document.getElementById("role").value);
+      const task = clean(document.getElementById("task").value);
+      const audience = clean(document.getElementById("audience").value);
+      const context = clean(document.getElementById("context").value);
+      const format = document.getElementById("format").value;
+      const tone = clean(document.getElementById("tone").value);
+      const constraints = clean(document.getElementById("constraints").value);
+      const quality = clean(document.getElementById("quality").value);
+      const example = clean(document.getElementById("example").value);
+      const standard = clean(document.getElementById("standard").value);
+      const clarifyMode = document.getElementById("clarifyMode").value;
+      const splitMode = document.getElementById("splitMode").value;
+
+      // Minimal guardrails to help emerging users avoid "empty prompt" situations
+      if (!task) {
+        document.getElementById("output").innerText =
+          "Please fill in at least the Task field (what you want the AI to do), then click Generate Prompt.";
+        return;
+      }
+
+      const formatInstruction = {
+        bulleted: "Use a bulleted outline with clear headings.",
+        numbered: "Use numbered steps with clear headings.",
+        table: "Present the output as a table. Include concise column headers.",
+        template: "Provide a fill-in template with placeholders (e.g., [______]).",
+        rubric: "Provide a rubric with performance levels and clear criteria.",
+        checklist: "Provide a checklist with actionable items.",
+        paragraphs: "Write short paragraphs with headings; keep it scannable."
+      }[format];
+
+      const clarifyInstruction = {
+        ask_first:
+          "If anything essential is missing or ambiguous, ask up to 3 clarifying questions BEFORE producing the final output.",
+        assume_then_answer:
+          "If anything essential is missing or ambiguous, proceed using reasonable assumptions and list the assumptions at the top.",
+        no_questions:
+          "Do not ask questions. Produce the best possible output based on what is provided."
+      }[clarifyMode];
+
+      // Build a best-practice prompt body (tool-agnostic)
+      const body =
+`ROLE
+${role ? role : "You are a helpful assistant."}
+
+TASK
+${task}
+
+AUDIENCE
+${audience ? audience : "General audience."}
+
+CONTEXT / INPUTS
+${context ? context : "No additional context provided."}
+
+REQUIRED OUTPUT FORMAT
+- ${formatInstruction}
+
+TONE
+${tone ? tone : "Clear, neutral, and concise."}
+
+CONSTRAINTS (MUST / AVOID)
+${constraints ? constraints : "- No additional constraints provided."}
+
+SUCCESS CRITERIA / QUALITY CHECKS
+${quality ? quality : "- Ensure the output is accurate, practical, and easy to use."}
+${standard ? `\nSTANDARD / REQUIREMENT\n${standard}` : ""}
+
+EXAMPLE / STYLE REFERENCE
+${example ? example : "(None provided.)"}
+
+PROCESS INSTRUCTION
+${clarifyInstruction}
+
+FINAL CHECK
+Before you finalize, quickly self-check for:
+1) completeness, 2) alignment to constraints, 3) clarity for the intended audience, 4) correct formatting.`;
+
+      // Optionally split into system + user (useful for advanced tools)
+      const systemMsg =
+`You are an expert prompt-writing assistant. Your job is to help the user produce a high-quality prompt for another AI model.
+Be structured, explicit, and practical. Do not add unnecessary filler.`;
+
+      const userMsg = body;
+
+      if (splitMode === "split") {
+        lastGenerated.system = systemMsg;
+        lastGenerated.user = userMsg;
+        lastGenerated.final =
+`SYSTEM MESSAGE
+${systemMsg}
+
+USER MESSAGE
+${userMsg}`;
+
+        // Show tabs
+        document.getElementById("tabs").style.display = "flex";
+        showTab("final");
+      } else {
+        lastGenerated.final = body;
+        lastGenerated.system = systemMsg;
+        lastGenerated.user = userMsg;
+
+        // Hide tabs
+        document.getElementById("tabs").style.display = "none";
+        activeView = "final";
+        document.getElementById("output").innerText = lastGenerated.final;
+      }
+    }
+
+    function showTab(which){
+      activeView = which;
+      document.getElementById("tabFinal").classList.toggle("active", which === "final");
+      document.getElementById("tabSystem").classList.toggle("active", which === "system");
+      document.getElementById("tabUser").classList.toggle("active", which === "user");
+
+      if (which === "final") document.getElementById("output").innerText = lastGenerated.final || "";
+      if (which === "system") document.getElementById("output").innerText = lastGenerated.system || "";
+      if (which === "user") document.getElementById("output").innerText = lastGenerated.user || "";
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("output").innerText;
+      if (!text.trim()) { alert("Nothing to copy yet. Click Generate Prompt first."); return; }
+      navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard."));
+    }
+
+    function downloadPrompt() {
+      const text = document.getElementById("output").innerText;
+      if (!text.trim()) { alert("Nothing to download yet. Click Generate Prompt first."); return; }
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = "llm_prompt_builder_output.txt";
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearFields(){
+      ["role","task","audience","context","tone","constraints","quality","example","standard"].forEach(id=>{
+        document.getElementById(id).value = "";
+      });
+      document.getElementById("format").value = "bulleted";
+      document.getElementById("clarifyMode").value = "ask_first";
+      document.getElementById("splitMode").value = "single";
+      lastGenerated = { final: "", system: "", user: "" };
+      document.getElementById("tabs").style.display = "none";
+      document.getElementById("output").innerText = "";
+    }
+  </script>
+</body>
+</html>
