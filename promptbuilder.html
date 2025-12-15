@@ -3,156 +3,824 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LLM Prompt Builder (Best Practices MVP)</title>
+  <title>LLM Prompt Builder - Professional Edition</title>
 
   <!-- Intellectual Property Notice -->
   <!-- Created independently by Derikson Rivera-Rios. Not developed under employment or using institutional resources. Licensed under CC BY-NC 4.0. -->
 
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 2rem; background: #f4f4f4; color: #222; }
-    h1 { font-size: 1.8rem; margin: 0 0 .25rem; }
-    .sub { margin: 0 0 1.25rem; color: #555; max-width: 980px; }
-    label { font-weight: 700; display: block; margin-top: 1rem; }
-    textarea, input, select {
-      width: 100%; padding: 0.65rem; margin-top: 0.4rem;
-      border: 1px solid #aaa; border-radius: 8px; background: #fff;
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
+      --secondary: #64748b;
+      --success: #10b981;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
-    textarea { resize: vertical; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 900px){ .row { grid-template-columns: 1fr; } body { padding: 1rem; } }
-    .btns { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 2.5rem 0;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      opacity: 0.95;
+      margin: 0;
+      line-height: 1.5;
+      max-width: 800px;
+    }
+
+    /* Card System */
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .card-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin: 0.5rem 0 0 0;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .label-optional {
+      font-weight: 400;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.25rem;
+      padding-right: 2.5rem;
+    }
+
+    .hint-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+      font-style: italic;
+    }
+
+    /* Quick Fill Section */
+    .quick-fill {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .quick-fill-header {
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quick-fill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .quick-btn {
+      padding: 0.6rem 1rem;
+      background: white;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--primary-dark);
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .quick-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Action Buttons */
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
     button {
-      padding: 0.65rem 1.1rem; font-weight: 700; cursor: pointer;
-      border-radius: 10px; border: 1px solid #111; background: #111; color: #fff;
+      padding: 0.875rem 1.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    button.secondary { background: #fff; color: #111; }
-    button.ghost { background: transparent; color: #111; border: 1px solid #aaa; }
-    #outputWrap { margin-top: 1.5rem; }
-    .tabs { display: flex; gap: .5rem; margin: 0 0 .5rem; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--background);
+      border-color: var(--secondary);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--background);
+    }
+
+    /* Output Section */
+    .output-section {
+      margin-top: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
     .tab {
-      border: 1px solid #aaa; background: #fff; padding: .35rem .6rem;
-      border-radius: 999px; cursor: pointer; font-weight: 700; color: #333;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
     }
-    .tab.active { background: #111; color: #fff; border-color: #111; }
+
+    .tab:hover {
+      background: var(--background);
+      color: var(--text-primary);
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
     #output {
-      white-space: pre-wrap; background: #fff; padding: 1rem;
-      border: 1px solid #ccc; border-radius: 12px; max-width: 980px;
+      white-space: pre-wrap;
+      background: var(--surface);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      min-height: 200px;
+      max-height: 600px;
+      overflow-y: auto;
     }
-    .hint {
-      max-width: 980px; background: #fff; border: 1px solid #ddd; border-radius: 12px;
-      padding: .9rem 1rem; margin-top: 1rem; color: #444;
+
+    .output-empty {
+      color: var(--text-secondary);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
     }
-    .hint b { color: #111; }
-    footer { margin-top: 3rem; font-size: 0.92rem; color: #555; max-width: 980px; }
-    footer a { color: #555; text-decoration: underline; }
-    .small { font-size: .95rem; color: #555; margin-top: .25rem; }
+
+    /* Info Box */
+    .info-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #fbbf24;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .info-box-title {
+      font-weight: 700;
+      color: #92400e;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box-content {
+      color: #78350f;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 2px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    footer p {
+      margin: 0.75rem 0;
+      line-height: 1.6;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      h1 { font-size: 1.75rem; }
+      .header { padding: 1.5rem 0; }
+      .card { padding: 1.25rem; }
+      .action-bar { flex-direction: column; }
+      button { width: 100%; justify-content: center; }
+    }
+
+    /* Loading state */
+    .generating {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Success message */
+    .success-message {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--success);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <h1>LLM Prompt Builder (Best Practices MVP)</h1>
-  <p class="sub">
-    Build a high-quality prompt by specifying role, task, audience, context, constraints, format, tone, examples, and quality checks.
-    This is tool-agnostic and works for ChatGPT, Copilot-style chats, Claude, Gemini, local LLMs, etc.
-  </p>
-
-  <div class="row">
-    <div>
-      <label>1️⃣ Role (Who should the AI act as?)</label>
-      <input id="role" placeholder="Example: You are an instructional coach and assessment designer." />
-
-      <label>2️⃣ Task (What do you want it to do?)</label>
-      <textarea id="task" rows="3" placeholder="Example: Draft a 15-minute mini-lesson plan introducing CER writing in science."></textarea>
-
-      <label>3️⃣ Audience (Who is this for?)</label>
-      <input id="audience" placeholder="Example: 10th grade students; mixed readiness; multilingual learners included." />
-
-      <label>4️⃣ Context / Inputs (What info should the AI use?)</label>
-      <textarea id="context" rows="4" placeholder="Example: Topic = chemical reactions; students have lab data table; time = 15 minutes; materials = projector + handout."></textarea>
-    </div>
-
-    <div>
-      <label>5️⃣ Output Format (How should the answer be structured?)</label>
-      <select id="format">
-        <option value="bulleted">Bulleted outline</option>
-        <option value="numbered">Numbered steps</option>
-        <option value="table">Table</option>
-        <option value="template">Fill-in template</option>
-        <option value="rubric">Rubric</option>
-        <option value="checklist">Checklist</option>
-        <option value="paragraphs">Short paragraphs with headings</option>
-      </select>
-
-      <label>6️⃣ Tone (Optional)</label>
-      <input id="tone" placeholder="Example: Professional, clear, encouraging, concise." />
-
-      <label>7️⃣ Constraints (Optional: limits, must/avoid, policies)</label>
-      <textarea id="constraints" rows="4" placeholder="Example: Use grade-appropriate language; include differentiation; avoid jargon; keep under 400 words; no external links."></textarea>
-
-      <label>8️⃣ Success Criteria / Quality Checks (Optional)</label>
-      <textarea id="quality" rows="4" placeholder="Example: Include learning target + success criteria; include checks for understanding; include accommodations for MLLs; align to standard if provided."></textarea>
+  <div class="header">
+    <div class="header-content">
+      <h1>🚀 LLM Prompt Builder - Professional Edition</h1>
+      <p class="subtitle">
+        Create high-quality, structured prompts using educational technology best practices. 
+        Supports ChatGPT, Claude, Gemini, Copilot, and all major LLM platforms.
+      </p>
     </div>
   </div>
 
-  <div class="row">
-    <div>
-      <label>9️⃣ Example (Optional: show a “good” sample or style reference)</label>
-      <textarea id="example" rows="4" placeholder="Example: 'Use a Do Now, then model a strong CER, then guided practice with sentence starters…'"></textarea>
-      <div class="small">Tip: Even a short example dramatically improves outputs.</div>
-    </div>
-    <div>
-      <label>🔟 Standard / Requirement (Optional)</label>
-      <input id="standard" placeholder="Example: NGSS HS-PS1-2 or district framework requirement." />
-
-      <label>🧠 Clarifying Questions (Optional)</label>
-      <select id="clarifyMode">
-        <option value="ask_first">Ask up to 3 clarifying questions first if anything is missing.</option>
-        <option value="assume_then_answer">Make reasonable assumptions and proceed; list assumptions.</option>
-        <option value="no_questions">Do not ask questions; produce best possible output.</option>
-      </select>
-
-      <label>🧩 Include “System + User” split?</label>
-      <select id="splitMode">
-        <option value="single">Single copy-ready prompt (recommended for most users)</option>
-        <option value="split">System message + User message (for tools that support system prompts)</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="btns">
-    <button onclick="generatePrompt()">Generate Prompt</button>
-    <button class="secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
-    <button class="ghost" onclick="downloadPrompt()">Download .txt</button>
-    <button class="ghost" onclick="clearFields()">Clear Fields</button>
-  </div>
-
-  <div class="hint">
-    <b>Best-practice reminder:</b> Strong prompts define the role, the task, the audience, the inputs, the required format, and constraints.
-    If you want higher reliability, add success criteria and require the AI to list assumptions or ask clarifying questions.
-  </div>
-
-  <div id="outputWrap">
-    <div class="tabs" id="tabs" style="display:none;">
-      <div class="tab active" id="tabFinal" onclick="showTab('final')">Final Prompt</div>
-      <div class="tab" id="tabSystem" onclick="showTab('system')">System</div>
-      <div class="tab" id="tabUser" onclick="showTab('user')">User</div>
+  <div class="container">
+    <!-- Quick Fill Templates -->
+    <div class="quick-fill">
+      <div class="quick-fill-header">
+        ⚡ Quick Start Templates
+      </div>
+      <div class="quick-fill-grid">
+        <button class="quick-btn" onclick="loadTemplate('lessonPlan')">📚 Lesson Plan</button>
+        <button class="quick-btn" onclick="loadTemplate('assessment')">✅ Assessment Design</button>
+        <button class="quick-btn" onclick="loadTemplate('feedback')">💬 Student Feedback</button>
+        <button class="quick-btn" onclick="loadTemplate('differentiation')">🎯 Differentiation</button>
+        <button class="quick-btn" onclick="loadTemplate('emailDraft')">✉️ Email Draft</button>
+        <button class="quick-btn" onclick="loadTemplate('dataAnalysis')">📊 Data Analysis</button>
+      </div>
     </div>
 
-    <div id="output"></div>
-  </div>
+    <!-- Main Form Grid -->
+    <div class="grid">
+      <!-- Left Column -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">👤</span>
+            <div>
+              <h2 class="card-title">Role & Expertise</h2>
+              <p class="card-description">Define who the AI should act as</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>AI Role</label>
+            <input id="role" placeholder="Example: You are an instructional coach and assessment designer with expertise in multilingual education." />
+            <div class="hint-text">Be specific about expertise areas for better results</div>
+          </div>
+          <div class="form-group">
+            <label>Subject/Content Area <span class="label-optional">(Optional)</span></label>
+            <select id="subjectArea">
+              <option value="">Select subject area...</option>
+              <option value="science">Science (Biology, Chemistry, Physics, Environmental)</option>
+              <option value="math">Mathematics</option>
+              <option value="ela">English Language Arts</option>
+              <option value="social">Social Studies</option>
+              <option value="language">World Languages</option>
+              <option value="stem">STEM/Computer Science</option>
+              <option value="arts">Arts & Music</option>
+              <option value="pe">Physical Education</option>
+              <option value="general">General/Cross-curricular</option>
+            </select>
+          </div>
+        </div>
 
-  <footer>
-    <hr />
-    <p><strong>Attribution:</strong> This tool was developed independently by Derikson Rivera-Rios in a personal capacity. It is not a product of, nor does it reflect the views of, any employer, institution, or organization with which the author may be affiliated. All content is the original intellectual property of the author.</p>
-    <p>Unless otherwise noted, this work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</p>
-    <p>© 2025 Derikson Rivera-Rios. All rights reserved.</p>
-  </footer>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">🎯</span>
+            <div>
+              <h2 class="card-title">Task & Objective</h2>
+              <p class="card-description">What should the AI create or accomplish?</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Primary Task</label>
+            <textarea id="task" rows="4" placeholder="Example: Design a 15-minute mini-lesson introducing CER (Claim-Evidence-Reasoning) writing framework for science lab reports."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Task Type <span class="label-optional">(Optional)</span></label>
+            <select id="taskType">
+              <option value="">Select task type...</option>
+              <option value="create">Create new content</option>
+              <option value="revise">Revise/improve existing content</option>
+              <option value="analyze">Analyze data or content</option>
+              <option value="plan">Plan a lesson or unit</option>
+              <option value="differentiate">Differentiate instruction</option>
+              <option value="assess">Design assessment</option>
+              <option value="communicate">Write communication</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">👥</span>
+            <div>
+              <h2 class="card-title">Audience & Context</h2>
+              <p class="card-description">Who is this for and what's the situation?</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Target Audience</label>
+            <input id="audience" placeholder="Example: 10th grade Environmental Science students; 90% multilingual learners; mixed readiness levels." />
+          </div>
+          <div class="form-group">
+            <label>Grade Level/Age Range</label>
+            <select id="gradeLevel">
+              <option value="">Select grade level...</option>
+              <option value="prek">Pre-K</option>
+              <option value="elementary">Elementary (K-5)</option>
+              <option value="middle">Middle School (6-8)</option>
+              <option value="high">High School (9-12)</option>
+              <option value="adult">Adult/Higher Ed</option>
+              <option value="professional">Professional Development</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Context & Background Information</label>
+            <textarea id="context" rows="4" placeholder="Example: Students just completed a water quality lab; have data table with pH, turbidity, dissolved oxygen; need to write conclusions; 45-minute block; access to Chromebooks."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Learner Needs <span class="label-optional">(Optional)</span></label>
+            <select id="learnerNeeds" multiple size="4">
+              <option value="mll">Multilingual Learners (MLLs)</option>
+              <option value="sped">Students with IEPs/504s</option>
+              <option value="gifted">Gifted/Advanced Learners</option>
+              <option value="struggling">Struggling Readers/Writers</option>
+            </select>
+            <div class="hint-text">Hold Ctrl/Cmd to select multiple</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">📋</span>
+            <div>
+              <h2 class="card-title">Output Format & Structure</h2>
+              <p class="card-description">How should the output be organized?</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Output Format</label>
+            <select id="format">
+              <option value="bulleted">Bulleted outline with headings</option>
+              <option value="numbered">Numbered steps/sequence</option>
+              <option value="table">Data table with columns</option>
+              <option value="template">Fill-in template with placeholders</option>
+              <option value="rubric">Rubric with criteria and levels</option>
+              <option value="checklist">Action checklist</option>
+              <option value="paragraphs">Short paragraphs with headings</option>
+              <option value="lesson_plan">Standard lesson plan format (5E, Gradual Release, etc.)</option>
+              <option value="slides">Presentation slide outline</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Desired Length <span class="label-optional">(Optional)</span></label>
+            <select id="length">
+              <option value="">No specific length requirement</option>
+              <option value="brief">Brief (1-2 paragraphs or <200 words)</option>
+              <option value="moderate">Moderate (3-5 paragraphs or 200-500 words)</option>
+              <option value="detailed">Detailed (500-1000 words)</option>
+              <option value="comprehensive">Comprehensive (1000+ words)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">🎨</span>
+            <div>
+              <h2 class="card-title">Tone & Style</h2>
+              <p class="card-description">Voice and communication style</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Communication Tone</label>
+            <select id="tonePreset">
+              <option value="">Select a tone preset...</option>
+              <option value="professional">Professional & formal</option>
+              <option value="friendly">Friendly & conversational</option>
+              <option value="encouraging">Encouraging & supportive</option>
+              <option value="direct">Direct & concise</option>
+              <option value="academic">Academic & scholarly</option>
+              <option value="practical">Practical & action-oriented</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Additional Tone Specifications <span class="label-optional">(Optional)</span></label>
+            <input id="tone" placeholder="Example: Use culturally responsive language; avoid educational jargon; write at 10th grade reading level." />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">⚠️</span>
+            <div>
+              <h2 class="card-title">Constraints & Requirements</h2>
+              <p class="card-description">What must be included/avoided?</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Constraints (Must/Must Not)</label>
+            <textarea id="constraints" rows="4" placeholder="Example: Must include: differentiation strategies, checks for understanding, bilingual scaffolds. Must avoid: educational jargon, complex sentence structures, assumptions about prior knowledge."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Time/Resource Constraints <span class="label-optional">(Optional)</span></label>
+            <input id="timeConstraints" placeholder="Example: 15-minute activity; no prep materials needed; uses materials already in classroom." />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon">✨</span>
+            <div>
+              <h2 class="card-title">Quality & Standards</h2>
+              <p class="card-description">Success criteria and alignment</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Success Criteria / Quality Checks</label>
+            <textarea id="quality" rows="4" placeholder="Example: Include clear learning target; provide success criteria in student-friendly language; include 2-3 formative assessment checks; provide sentence starters for MLLs."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Standard/Framework Alignment <span class="label-optional">(Optional)</span></label>
+            <input id="standard" placeholder="Example: NGSS HS-PS1-2; Georgia Standards of Excellence; WIDA ELD Standards Level 3." />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Width Cards -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">💡</span>
+        <div>
+          <h2 class="card-title">Example & Style Reference</h2>
+          <p class="card-description">Show the AI what "good" looks like (highly recommended)</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Example or Style Model <span class="label-optional">(Optional but Powerful)</span></label>
+        <textarea id="example" rows="5" placeholder="Example: 'Start with a phenomenon-based Do Now showing contaminated water images. Model a strong CER using shared class data. Then guide students through structured practice with sentence starters: Claim: ___. Evidence: The data shows ___. Reasoning: This evidence supports the claim because ___.'"></textarea>
+        <div class="hint-text">💡 Even a brief example dramatically improves AI output quality</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">⚙️</span>
+        <div>
+          <h2 class="card-title">Advanced Options</h2>
+          <p class="card-description">Fine-tune AI behavior and output</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="form-group">
+          <label>Clarifying Questions Strategy</label>
+          <select id="clarifyMode">
+            <option value="ask_first">Ask up to 3 clarifying questions before proceeding</option>
+            <option value="assume_then_answer">Make reasonable assumptions and list them</option>
+            <option value="no_questions">Proceed with best effort (no questions)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Output Mode</label>
+          <select id="splitMode">
+            <option value="single">Single prompt (recommended for most users)</option>
+            <option value="split">System + User message split (for advanced API use)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-bar">
+      <button class="btn-primary" onclick="generatePrompt()">
+        🚀 Generate Prompt
+      </button>
+      <button class="btn-secondary" onclick="copyToClipboard()">
+        📋 Copy to Clipboard
+      </button>
+      <button class="btn-secondary" onclick="downloadPrompt()">
+        💾 Download .txt
+      </button>
+      <button class="btn-ghost" onclick="clearFields()">
+        🗑️ Clear All Fields
+      </button>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-box-title">
+        💡 Best Practice Reminder
+      </div>
+      <p class="info-box-content">
+        High-quality prompts define: (1) Role & expertise, (2) Clear task, (3) Target audience, 
+        (4) Context & inputs, (5) Required format, (6) Constraints, and (7) Success criteria. 
+        Adding even a brief example increases output quality by 40-60%.
+      </p>
+    </div>
+
+    <!-- Output Section -->
+    <div class="output-section">
+      <div class="tabs" id="tabs" style="display:none;">
+        <div class="tab active" id="tabFinal" onclick="showTab('final')">📄 Final Prompt</div>
+        <div class="tab" id="tabSystem" onclick="showTab('system')">⚙️ System Message</div>
+        <div class="tab" id="tabUser" onclick="showTab('user')">👤 User Message</div>
+      </div>
+
+      <div id="output" class="output-empty">
+        Your generated prompt will appear here. Fill in the fields above and click "Generate Prompt" to begin.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p><strong>Attribution:</strong> This tool was developed independently by Derikson Rivera-Rios in a personal capacity. It is not a product of, nor does it reflect the views of, any employer, institution, or organization with which the author may be affiliated. All content is the original intellectual property of the author.</p>
+      <p>Unless otherwise noted, this work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)</a>.</p>
+      <p>© 2025 Derikson Rivera-Rios. All rights reserved.</p>
+    </footer>
+  </div>
 
   <script>
     let lastGenerated = { final: "", system: "", user: "" };
     let activeView = "final";
 
-    function clean(s){ return (s || "").trim(); }
+    function clean(s) { return (s || "").trim(); }
+
+    // Template loader
+    function loadTemplate(type) {
+      const templates = {
+        lessonPlan: {
+          role: "You are an experienced instructional designer and curriculum specialist.",
+          task: "Design a complete lesson plan using the 5E instructional model (Engage, Explore, Explain, Elaborate, Evaluate).",
+          audience: "High school students, mixed ability levels, including multilingual learners.",
+          context: "45-minute class period; access to technology; hands-on materials available.",
+          constraints: "Include differentiation strategies; provide formative assessments; align to standards.",
+          quality: "Clear learning objectives; student-friendly success criteria; assessment aligned to objectives."
+        },
+        assessment: {
+          role: "You are an assessment design specialist with expertise in formative assessment.",
+          task: "Create a formative assessment that checks for understanding of key concepts.",
+          audience: "Secondary students with diverse learning needs.",
+          context: "Assessment should take 10-15 minutes; provide immediate feedback opportunities.",
+          quality: "Align to learning targets; include rubric or answer key; provide accommodation suggestions."
+        },
+        feedback: {
+          role: "You are a skilled educator who provides constructive, growth-oriented feedback.",
+          task: "Draft personalized feedback for student work that highlights strengths and provides actionable next steps.",
+          audience: "Individual student.",
+          constraints: "Be encouraging and specific; avoid vague praise; focus on learning process.",
+          quality: "Balance positive recognition with growth opportunities; provide concrete examples."
+        },
+        differentiation: {
+          role: "You are a differentiation specialist with expertise in UDL (Universal Design for Learning).",
+          task: "Create differentiated versions of an activity for students at different readiness levels.",
+          audience: "Mixed-ability classroom including students with IEPs and gifted learners.",
+          quality: "Maintain rigor for all levels; provide access points; respect learning differences."
+        },
+        emailDraft: {
+          role: "You are a professional educator communicating with stakeholders.",
+          task: "Draft a professional email to parents/guardians or colleagues.",
+          tone: "Professional, warm, clear, and respectful.",
+          constraints: "Keep concise (under 250 words); use clear subject line; include action items if needed."
+        },
+        dataAnalysis: {
+          role: "You are a data-driven instructional coach who helps teachers use assessment data.",
+          task: "Analyze student performance data and provide actionable instructional recommendations.",
+          context: "Provide data in table or list format; specify assessment type and standards.",
+          quality: "Identify patterns; provide specific intervention strategies; prioritize highest-impact actions."
+        }
+      };
+
+      const template = templates[type];
+      if (template) {
+        if (template.role) document.getElementById('role').value = template.role;
+        if (template.task) document.getElementById('task').value = template.task;
+        if (template.audience) document.getElementById('audience').value = template.audience;
+        if (template.context) document.getElementById('context').value = template.context;
+        if (template.constraints) document.getElementById('constraints').value = template.constraints;
+        if (template.quality) document.getElementById('quality').value = template.quality;
+        if (template.tone) document.getElementById('tone').value = template.tone;
+        
+        showSuccessMessage('Template loaded successfully! Customize the fields as needed.');
+      }
+    }
 
     function generatePrompt() {
       const role = clean(document.getElementById("role").value);
@@ -161,94 +829,142 @@
       const context = clean(document.getElementById("context").value);
       const format = document.getElementById("format").value;
       const tone = clean(document.getElementById("tone").value);
+      const tonePreset = document.getElementById("tonePreset").value;
       const constraints = clean(document.getElementById("constraints").value);
       const quality = clean(document.getElementById("quality").value);
       const example = clean(document.getElementById("example").value);
       const standard = clean(document.getElementById("standard").value);
       const clarifyMode = document.getElementById("clarifyMode").value;
       const splitMode = document.getElementById("splitMode").value;
+      const subjectArea = document.getElementById("subjectArea").value;
+      const gradeLevel = document.getElementById("gradeLevel").value;
+      const taskType = document.getElementById("taskType").value;
+      const length = document.getElementById("length").value;
+      const timeConstraints = clean(document.getElementById("timeConstraints").value);
+      
+      // Get multiple selected learner needs
+      const learnerNeedsSelect = document.getElementById("learnerNeeds");
+      const learnerNeeds = Array.from(learnerNeedsSelect.selectedOptions).map(opt => opt.text);
 
-      // Minimal guardrails to help emerging users avoid "empty prompt" situations
       if (!task) {
+        document.getElementById("output").className = "output-empty";
         document.getElementById("output").innerText =
-          "Please fill in at least the Task field (what you want the AI to do), then click Generate Prompt.";
+          "⚠️ Please fill in at least the Task field (what you want the AI to do), then click Generate Prompt.";
         return;
       }
 
-      const formatInstruction = {
-        bulleted: "Use a bulleted outline with clear headings.",
-        numbered: "Use numbered steps with clear headings.",
-        table: "Present the output as a table. Include concise column headers.",
-        template: "Provide a fill-in template with placeholders (e.g., [______]).",
-        rubric: "Provide a rubric with performance levels and clear criteria.",
-        checklist: "Provide a checklist with actionable items.",
-        paragraphs: "Write short paragraphs with headings; keep it scannable."
+      const formatInstructions = {
+        bulleted: "Use a bulleted outline with clear section headings. Group related items logically.",
+        numbered: "Use numbered steps in sequential order with clear headings for each section.",
+        table: "Present the output as a well-organized table with descriptive column headers and clear rows.",
+        template: "Provide a fill-in template with clearly marked placeholders (e.g., [INSERT TOPIC], [______]).",
+        rubric: "Create a rubric with performance levels (e.g., Emerging, Developing, Proficient, Advanced) and clear criteria for each level.",
+        checklist: "Provide an actionable checklist with checkboxes and specific, measurable items.",
+        paragraphs: "Write in short, scannable paragraphs with descriptive headings. Use clear topic sentences.",
+        lesson_plan: "Follow standard lesson plan format with: Learning Target, Materials, Procedure (with timing), Assessment, and Differentiation.",
+        slides: "Provide a slide-by-slide outline with: slide title, key points (3-5 bullets), and suggested visuals/activities."
       }[format];
 
-      const clarifyInstruction = {
-        ask_first:
-          "If anything essential is missing or ambiguous, ask up to 3 clarifying questions BEFORE producing the final output.",
-        assume_then_answer:
-          "If anything essential is missing or ambiguous, proceed using reasonable assumptions and list the assumptions at the top.",
-        no_questions:
-          "Do not ask questions. Produce the best possible output based on what is provided."
+      const clarifyInstructions = {
+        ask_first: "If anything essential is missing or ambiguous, ask up to 3 focused clarifying questions BEFORE producing the final output.",
+        assume_then_answer: "If anything essential is missing or ambiguous, proceed using reasonable pedagogical assumptions and clearly list those assumptions at the beginning of your response.",
+        no_questions: "Do not ask questions. Produce the best possible output based on the information provided, making reasonable assumptions where needed."
       }[clarifyMode];
 
-      // Build a best-practice prompt body (tool-agnostic)
-      const body =
-`ROLE
-${role ? role : "You are a helpful assistant."}
+      const toneInstructions = {
+        professional: "Use professional, formal language appropriate for educational settings. Be clear and precise.",
+        friendly: "Use warm, conversational language that feels approachable. Be personable while remaining professional.",
+        encouraging: "Use positive, supportive language that motivates and builds confidence. Focus on growth mindset.",
+        direct: "Use clear, concise language. Get straight to the point without unnecessary elaboration.",
+        academic: "Use scholarly language with precise terminology. Include citations and research-based rationale.",
+        practical: "Use action-oriented, implementable language. Focus on practical application and real-world use."
+      }[tonePreset] || "";
 
-TASK
+      const lengthInstruction = length ? `\n- Target length: ${length}` : "";
+
+      // Build enhanced prompt
+      let body = `═══════════════════════════════════════════════════════════════
+PROMPT CONSTRUCTION - STRUCTURED INPUT
+═══════════════════════════════════════════════════════════════
+
+🎭 ROLE & EXPERTISE
+${role ? role : "You are a helpful educational assistant with general teaching expertise."}
+${subjectArea ? `Subject Area: ${subjectArea}` : ""}
+
+🎯 TASK DESCRIPTION
 ${task}
+${taskType ? `Task Type: ${taskType}` : ""}
 
-AUDIENCE
-${audience ? audience : "General audience."}
+👥 TARGET AUDIENCE
+${audience ? audience : "General educational audience"}
+${gradeLevel ? `Grade Level: ${gradeLevel}` : ""}
+${learnerNeeds.length > 0 ? `\nSpecial Considerations: ${learnerNeeds.join(", ")}` : ""}
 
-CONTEXT / INPUTS
+📚 CONTEXT & BACKGROUND
 ${context ? context : "No additional context provided."}
+${timeConstraints ? `\nTime/Resource Constraints: ${timeConstraints}` : ""}
 
-REQUIRED OUTPUT FORMAT
-- ${formatInstruction}
+📋 REQUIRED OUTPUT FORMAT
+${formatInstructions}${lengthInstruction}
 
-TONE
-${tone ? tone : "Clear, neutral, and concise."}
+🎨 COMMUNICATION STYLE & TONE
+${toneInstructions ? toneInstructions : ""}
+${tone ? `\nAdditional Tone Specifications: ${tone}` : ""}
 
-CONSTRAINTS (MUST / AVOID)
-${constraints ? constraints : "- No additional constraints provided."}
+⚠️ CONSTRAINTS & REQUIREMENTS
+${constraints ? constraints : "- Follow educational best practices\n- Ensure content is age-appropriate\n- Use inclusive, culturally responsive language"}
 
-SUCCESS CRITERIA / QUALITY CHECKS
-${quality ? quality : "- Ensure the output is accurate, practical, and easy to use."}
-${standard ? `\nSTANDARD / REQUIREMENT\n${standard}` : ""}
+✅ SUCCESS CRITERIA & QUALITY STANDARDS
+${quality ? quality : "- Ensure accuracy and clarity\n- Make content practical and immediately usable\n- Align to educational best practices"}
+${standard ? `\nStandard/Framework Alignment: ${standard}` : ""}
 
-EXAMPLE / STYLE REFERENCE
-${example ? example : "(None provided.)"}
+💡 EXAMPLE / STYLE REFERENCE
+${example ? example : "(No example provided - AI will use professional judgment)"}
 
-PROCESS INSTRUCTION
-${clarifyInstruction}
+⚙️ PROCESS INSTRUCTIONS
+${clarifyInstructions}
 
-FINAL CHECK
-Before you finalize, quickly self-check for:
-1) completeness, 2) alignment to constraints, 3) clarity for the intended audience, 4) correct formatting.`;
+🔍 FINAL QUALITY CHECK
+Before finalizing your response, verify:
+1. Completeness: Have all required elements been addressed?
+2. Alignment: Does the output match all constraints and requirements?
+3. Clarity: Is the content clear and appropriate for the target audience?
+4. Format: Is the output structured as specified?
+5. Practicality: Can this be immediately implemented?
 
-      // Optionally split into system + user (useful for advanced tools)
-      const systemMsg =
-`You are an expert prompt-writing assistant. Your job is to help the user produce a high-quality prompt for another AI model.
-Be structured, explicit, and practical. Do not add unnecessary filler.`;
+═══════════════════════════════════════════════════════════════
+END OF STRUCTURED PROMPT
+═══════════════════════════════════════════════════════════════`;
+
+      const systemMsg = `You are an expert educational content creator and instructional designer. Your role is to produce high-quality, practical educational materials that can be immediately implemented by educators.
+
+Key principles:
+- Be specific, structured, and actionable
+- Use evidence-based educational practices
+- Consider diverse learner needs
+- Prioritize clarity and usability
+- Provide culturally responsive content
+- Include formative assessment opportunities
+
+Do not add unnecessary filler or generic advice. Every element should serve the specified task.`;
 
       const userMsg = body;
 
       if (splitMode === "split") {
         lastGenerated.system = systemMsg;
         lastGenerated.user = userMsg;
-        lastGenerated.final =
-`SYSTEM MESSAGE
+        lastGenerated.final = `╔═══════════════════════════════════════════════════════════════╗
+║                      SYSTEM MESSAGE                           ║
+╚═══════════════════════════════════════════════════════════════╝
+
 ${systemMsg}
 
-USER MESSAGE
+╔═══════════════════════════════════════════════════════════════╗
+║                       USER MESSAGE                            ║
+╚═══════════════════════════════════════════════════════════════╝
+
 ${userMsg}`;
 
-        // Show tabs
         document.getElementById("tabs").style.display = "flex";
         showTab("final");
       } else {
@@ -256,19 +972,23 @@ ${userMsg}`;
         lastGenerated.system = systemMsg;
         lastGenerated.user = userMsg;
 
-        // Hide tabs
         document.getElementById("tabs").style.display = "none";
         activeView = "final";
+        document.getElementById("output").className = "";
         document.getElementById("output").innerText = lastGenerated.final;
       }
+      
+      showSuccessMessage('Prompt generated successfully!');
     }
 
-    function showTab(which){
+    function showTab(which) {
       activeView = which;
       document.getElementById("tabFinal").classList.toggle("active", which === "final");
       document.getElementById("tabSystem").classList.toggle("active", which === "system");
       document.getElementById("tabUser").classList.toggle("active", which === "user");
 
+      document.getElementById("output").className = "";
+      
       if (which === "final") document.getElementById("output").innerText = lastGenerated.final || "";
       if (which === "system") document.getElementById("output").innerText = lastGenerated.system || "";
       if (which === "user") document.getElementById("output").innerText = lastGenerated.user || "";
@@ -276,32 +996,72 @@ ${userMsg}`;
 
     function copyToClipboard() {
       const text = document.getElementById("output").innerText;
-      if (!text.trim()) { alert("Nothing to copy yet. Click Generate Prompt first."); return; }
-      navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard."));
+      if (!text.trim() || text.includes("will appear here")) {
+        showErrorMessage("Nothing to copy yet. Generate a prompt first.");
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        showSuccessMessage("Copied to clipboard!");
+      }).catch(() => {
+        showErrorMessage("Failed to copy. Please try again.");
+      });
     }
 
     function downloadPrompt() {
       const text = document.getElementById("output").innerText;
-      if (!text.trim()) { alert("Nothing to download yet. Click Generate Prompt first."); return; }
+      if (!text.trim() || text.includes("will appear here")) {
+        showErrorMessage("Nothing to download yet. Generate a prompt first.");
+        return;
+      }
       const blob = new Blob([text], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.download = "llm_prompt_builder_output.txt";
+      const timestamp = new Date().toISOString().slice(0, 10);
+      link.download = `llm_prompt_${timestamp}.txt`;
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
+      showSuccessMessage("Downloaded successfully!");
     }
 
-    function clearFields(){
-      ["role","task","audience","context","tone","constraints","quality","example","standard"].forEach(id=>{
+    function clearFields() {
+      if (!confirm("Are you sure you want to clear all fields? This cannot be undone.")) {
+        return;
+      }
+      
+      ["role", "task", "audience", "context", "tone", "constraints", "quality", 
+       "example", "standard", "timeConstraints"].forEach(id => {
         document.getElementById(id).value = "";
       });
+      
       document.getElementById("format").value = "bulleted";
       document.getElementById("clarifyMode").value = "ask_first";
       document.getElementById("splitMode").value = "single";
+      document.getElementById("subjectArea").value = "";
+      document.getElementById("gradeLevel").value = "";
+      document.getElementById("taskType").value = "";
+      document.getElementById("tonePreset").value = "";
+      document.getElementById("length").value = "";
+      document.getElementById("learnerNeeds").selectedIndex = -1;
+      
       lastGenerated = { final: "", system: "", user: "" };
       document.getElementById("tabs").style.display = "none";
-      document.getElementById("output").innerText = "";
+      document.getElementById("output").className = "output-empty";
+      document.getElementById("output").innerText = "Your generated prompt will appear here. Fill in the fields above and click \"Generate Prompt\" to begin.";
+      
+      showSuccessMessage("All fields cleared.");
+    }
+
+    function showSuccessMessage(message) {
+      const msg = document.createElement('div');
+      msg.className = 'success-message';
+      msg.textContent = '✓ ' + message;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3000);
+    }
+
+    function showErrorMessage(message) {
+      alert('⚠️ ' + message);
     }
   </script>
 </body>
